@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+    <!--**********************************************************************-->
+    <!--**********************************************************************-->
+    <changeSet id="1681967263310-1" author="Artem_Petrov1">
+        <comment>Create currency_prices table</comment>
+        <sql>
+            CREATE TABLE currency_prices
+            (
+                symbol    VARCHAR(5)     NOT NULL,
+                price     NUMERIC(16, 4) NOT NULL,
+                timestamp TIMESTAMPTZ    NOT NULL
+            );
+        </sql>
+        <rollback>
+            <sql>DROP TABLE currency_prices;</sql>
+        </rollback>
+    </changeSet>
+
+    <!--**********************************************************************-->
+    <!--**********************************************************************-->
+    <changeSet id="1681935648933-1" context="timescale"  author="Artem_Petrov1">
+        <comment>Make currency_prices a hypertable</comment>
+        <sql>SELECT create_hypertable('currency_prices', 'timestamp');</sql>
+    </changeSet>
+
+
+    <!--**********************************************************************-->
+    <!--**********************************************************************-->
+    <changeSet id="1682014362223-1" author="Artem_Petrov1">
+        <comment>Create index on currency_prices</comment>
+        <sql>CREATE INDEX idx_currency_prices_symbol_ts ON currency_prices USING BTREE (symbol, timestamp DESC);</sql>
+        <rollback>
+            <sql>DROP INDEX idx_currency_prices_symbol_ts</sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

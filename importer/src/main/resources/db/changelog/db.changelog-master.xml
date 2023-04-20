@@ -4,6 +4,20 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <includeAll path="classpath:db/changelog/changelogs"/>
+    <changeSet id="1681966943785-1" context="postgres" author="Artem_Petrov1">
+        <comment>SpringBatch schema setup for PostgreSQL</comment>
+        <sqlFile path="org/springframework/batch/core/schema-postgresql.sql"/>
+        <rollback>
+            <sqlFile path="org/springframework/batch/core/schema-drop-postgresql.sql"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="1681966943786-1" context="h2" author="Artem_Petrov1">
+        <comment>SpringBatch schema setup for H2</comment>
+        <sqlFile path="org/springframework/batch/core/schema-h2.sql"/>
+        <rollback>
+            <sqlFile path="org/springframework/batch/core/schema-drop-h2.sql"/>
+        </rollback>
+    </changeSet>
 
 </databaseChangeLog>

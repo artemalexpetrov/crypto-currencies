@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--**********************************************************************-->
+    <!--**********************************************************************-->
+    <include file="classpath:db/changelog/db.changelog-master.xml"/>
+
+    <!--**********************************************************************-->
+    <!--**********************************************************************-->
+    <changeSet id="1681967263310-1" author="Artem_Petrov1">
+        <comment>Create currency_prices table</comment>
+        <sql>
+            CREATE TABLE currency_prices
+            (
+                symbol    VARCHAR(5)     NOT NULL,
+                price     NUMERIC(16, 4) NOT NULL,
+                timestamp TIMESTAMPTZ    NOT NULL
+            );
+        </sql>
+        <rollback>
+            <sql>DROP TABLE currency_prices;</sql>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
