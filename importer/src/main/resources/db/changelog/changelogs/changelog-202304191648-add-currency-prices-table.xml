@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+    <changeSet id="1681967263310-1" author="Artem_Petrov1">
+        <comment>Create currency_prices table</comment>
+        <sql>
+            CREATE TABLE currency_prices
+            (
+                symbol    VARCHAR(5)     NOT NULL,
+                price     NUMERIC(16, 4) NOT NULL,
+                timestamp TIMESTAMPTZ    NOT NULL
+            );
+        </sql>
+        <rollback>
+            <sql>DROP TABLE currency_prices;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="1681935648933-1" context="timescale"  author="Artem_Petrov1">
+        <comment>Make currency_prices a hypertable</comment>
+        <sql>SELECT create_hypertable('currency_prices', 'timestamp');</sql>
+    </changeSet>
+
+    <changeSet id="1681935375303-1" context="timescale" author="Artem_Petrov1" runInTransaction="false">
+        <sql>
+            CREATE
+            MATERIALIZED VIEW currency_price_daily WITH (timescaledb.continuous) AS
+            SELECT symbol,
+                   time_bucket('1 day'::interval, timestamp) AS bucket_daily, first (price, timestamp) AS oldest_price, last (price, timestamp) AS newest_price, min (price) AS min_price, max (price) AS max_price, (max (price) - min (price)) / min (price) AS normalized_range
+            FROM currency_prices
+            GROUP BY symbol, bucket_daily
+        </sql>
+        <rollback>
+            <sql>DROP MATERIALIZED VIEW currency_price_daily</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="1681935375403-1" context="timescale" author="Artem_Petrov1" runInTransaction="false">
+        <sql>
+            CREATE
+            MATERIALIZED VIEW currency_price_monthly WITH (timescaledb.continuous) AS
+            SELECT symbol,
+                   time_bucket('1 month'::interval, bucket_daily) AS bucket_monthly, first (oldest_price, bucket_daily) AS oldest_price, last (newest_price, bucket_daily) AS newest_price, min (min_price) AS min_price, max (max_price) AS max_price, (max (max_price) - min (min_price)) / min (min_price) AS normalized_range
+            FROM currency_price_daily
+            GROUP BY symbol, bucket_monthly
+        </sql>
+        <rollback>
+            <sql>DROP MATERIALIZED VIEW currency_price_monthly</sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

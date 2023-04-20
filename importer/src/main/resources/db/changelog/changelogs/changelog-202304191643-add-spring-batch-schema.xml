@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+
+    <changeSet id="1681966943785-1" context="postgres" author="Artem_Petrov1">
+        <comment>SpringBatch schema setup for PostgreSQL</comment>
+        <sqlFile path="org/springframework/batch/core/schema-postgresql.sql"/>
+        <rollback>
+            <sqlFile path="org/springframework/batch/core/schema-drop-postgresql.sql"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="1681966943786-1" context="h2" author="Artem_Petrov1">
+        <comment>SpringBatch schema setup for H2</comment>
+        <sqlFile path="org/springframework/batch/core/schema-h2.sql"/>
+        <rollback>
+            <sqlFile path="org/springframework/batch/core/schema-drop-h2.sql"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
