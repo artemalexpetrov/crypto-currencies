@@ -36,7 +36,7 @@ class ImportResourceDiscovererImplTest {
     @SneakyThrows
     void testDiscover() {
         // given
-        String importPattern = ResourceUtils.FILE_URL_PREFIX + tempDirectory.resolve("*.csv");
+        String importPattern = ResourceUtils.FILE_URL_PREFIX + tempDirectory + "/*.csv";
         when(propertiesMock.getImportPattern()).thenReturn(importPattern);
 
         Path file1 = createResourceFile();
@@ -55,7 +55,7 @@ class ImportResourceDiscovererImplTest {
     @SneakyThrows
     void testDiscover_whenNoFiles_expectEmptyList() {
         // given
-        String importPattern = ResourceUtils.FILE_URL_PREFIX + tempDirectory.resolve("*.csv");
+        String importPattern = ResourceUtils.FILE_URL_PREFIX + tempDirectory + "/*.csv";
         when(propertiesMock.getImportPattern()).thenReturn(importPattern);
 
         // when
@@ -68,7 +68,7 @@ class ImportResourceDiscovererImplTest {
     @Test
     void testDiscover_whenUnsupportedLocationIsGiven_expectDiscoveryException() {
         // given
-        String importPattern = tempDirectory.resolve("*.csv").toString();
+        String importPattern = tempDirectory + "/*.csv";
         when(propertiesMock.getImportPattern()).thenReturn(importPattern);
 
         // when / then

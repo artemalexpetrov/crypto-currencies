@@ -35,7 +35,7 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.username", () -> databaseContainer.getUsername());
         registry.add("spring.datasource.password", () -> databaseContainer.getPassword());
 
-        registry.add("import.import-pattern", () -> tempDirectory.resolve("import/*.csv").toString());
+        registry.add("import.import-pattern", () -> tempDirectory + "import/*.csv");
         registry.add("import.imported-files-location", () -> tempDirectory.resolve("imported").toString());
     }
 
