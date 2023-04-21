@@ -2,14 +2,17 @@ package crypto.investments.api.persistency.model;
 
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Getter
 @Builder
-public class CurrencyInfo {
+@EqualsAndHashCode
+public class CurrencyInfo implements Serializable {
 
     public static final int NORMALIZED_RANGE_SCALE = 4;
 

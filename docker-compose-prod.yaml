@@ -1,0 +1,127 @@
+version: "3.0"
+
+networks:
+  crypto-investments-network:
+    driver: bridge
+
+services:
+  # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  crypto-investments-api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    image: crypto-investments-api:latest
+    platform: linux/x86_64
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}-api
+    links:
+      - database
+      - redis
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - crypto-investments-network
+    ports:
+      - "${API_PORT}:8080"
+    tty: true
+    environment:
+      MANAGEMENT_SERVER_PORT: ${API_MANAGEMENT_PORT}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_MAX_CONNECTIONS: ${DB_MAX_CONNECTIONS}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SWAGGER_URL: ${SWAGGER_URL}
+      OPENAPI_URL: ${OPENAPI_URL}
+      MAX_REQUESTS_PER_MINUTE: ${API_MAX_REQUESTS_PER_MINUTE}
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'wget -q --output-document - http://localhost:${API_MANAGEMENT_PORT}/actuator/health'"]
+      interval: 10s
+      timeout: 60s
+      retries: 10
+
+  # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  crypto-investments-importer:
+    build:
+      context: .
+      dockerfile: importer/Dockerfile
+    image: crypto-investments-importer:latest
+    platform: linux/x86_64
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}-importer
+    links:
+      - database
+    depends_on:
+      crypto-investments-api:
+        condition: service_healthy
+    networks:
+      - crypto-investments-network
+    ports:
+      - "${IMPORTER_PORT}:8080"
+    tty: true
+    volumes:
+      - ${IMPORT_DATA_HOST_DIRECTORY}:${IMPORT_DATA_CONTAINER_DIRECTORY}:rw
+    environment:
+      MANAGEMENT_SERVER_PORT: ${IMPORTER_MANAGEMENT_PORT}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_MAX_CONNECTIONS: ${DB_MAX_CONNECTIONS}
+      IMPORT_DATA_DIR: ${IMPORT_DATA_CONTAINER_DIRECTORY}
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'wget -q --output-document - http://localhost:${IMPORTER_MANAGEMENT_PORT}/actuator/health'" ]
+      interval: 10s
+      timeout: 60s
+      retries: 10
+
+  # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  database:
+    image: timescale/timescaledb-ha:pg15-latest
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}-database
+    tty: true
+    networks:
+      - crypto-investments-network
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - ~/.volumes/database/postgresql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGTZ: ${TIMEZONE}
+      TZ: ${TIMEZONE}
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}'"]
+      interval: 10s
+      timeout: 60s
+      retries: 10
+
+  # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    tty: true
+    networks:
+      - crypto-investments-network
+    ports:
+      - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 60s
+      retries: 10

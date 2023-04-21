@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Validated
 public record BestCurrencyInfoRequest(
 
-
+    @NonNull
+    @PastOrPresent
     LocalDate date) {
 }

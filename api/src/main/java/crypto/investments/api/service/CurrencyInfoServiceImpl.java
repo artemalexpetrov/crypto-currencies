@@ -21,6 +21,7 @@ public class CurrencyInfoServiceImpl implements CurrencyInfoService {
     private final CurrencyInfoRepository repository;
     private final CurrencyInfoMapper mapper;
 
+
     @Override
     public CurrencyInfoDto getCurrencyInfo(CurrencyInfoRequest request) {
         ensureCurrencyExists(request.symbol());

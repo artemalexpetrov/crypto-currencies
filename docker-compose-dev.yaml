@@ -1,0 +1,39 @@
+version: "3.0"
+
+services:
+  # Just dependencies for local development
+  # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  database:
+    image: timescale/timescaledb-ha:pg15-latest
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}-database
+    tty: true
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGTZ: ${TIMEZONE}
+      TZ: ${TIMEZONE}
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}'"]
+      interval: 10s
+      timeout: 60s
+      retries: 10
+
+  # ------------------------------------------------------------------
+  # ------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    tty: true
+    ports:
+      - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 60s
+      retries: 10

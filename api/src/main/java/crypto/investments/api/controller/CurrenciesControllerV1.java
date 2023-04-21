@@ -44,11 +44,10 @@ public class CurrenciesControllerV1 {
             The best currency is the currency with the max normalized range for the specified date
             """
     )
-
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
-            description = "List of currencies",
+            description = "Best currency for the requested date",
             content = { @Content(mediaType = "application/json")}),
         @ApiResponse(
             responseCode = "400",
@@ -67,7 +66,7 @@ public class CurrenciesControllerV1 {
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
-            description = "List of currencies",
+            description = "Currency found by the specified symbol",
             content = { @Content(mediaType = "application/json")}),
         @ApiResponse(
             responseCode = "404",
